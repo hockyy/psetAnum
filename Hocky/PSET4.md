@@ -198,3 +198,225 @@ Total Flops:
 
 ## Nomor 2
 
+```octave
+2;
+function [A] = getBanded(n, p, q)
+  A = zeros(n, n);
+  for j=1:n
+    for i=max(j-p, 1):min(j+q, n)
+      A(i,j) = rand();
+    endfor
+  endfor
+endfunction
+
+function [A] = getBanded2(n, p, q)
+  A = rand(n, n);
+  for i=1:n
+    for j=1:n
+      if(j > i + p)
+        A(i,j) = 0;
+      endif
+      if(i > j + q)
+        A(i,j) = 0;
+      endif
+    endfor
+  endfor
+endfunction
+
+function [L U] = LU(A, p, q)
+  [n n] = size(A);
+  L = eye(n);
+  % Looping setiap kolom
+  for k=1:n-1
+    % Untuk baris ke bawahnya
+    for i=k+1:min(k+q, n)
+      % Hitung L nya
+      L(i, k) = A(i, k)/A(k,k);
+      A(i, k) = 0;
+      % Lakukan pengurangan untuk baris ke-i
+      for j=k+1:min(k+p, n)
+        % Sampai k + p saja, karena kanan sisanya sudah 0
+        A(i, j) -= L(i, k) * A(k, j);
+      endfor
+    endfor
+  endfor
+  U = A;
+endfunction
+
+n = 6; p = 2; q = 3;
+A = getBanded2(n, p, q);
+disp(A);
+[L U] = LU(A, p, q);
+disp(L); disp(U);
+disp(L * U - A);
+```
+
+![image-20210316072656245](PSET4.assets/image-20210316072656245.png)
+
+Operasi perhitungan $L$ pembagian di awal akan dilakukan sebanyak sekitar $(n - q - 1) q + \sum_{i = 1}^qi = \frac{2q(n - q - 1) + q(q+1)}{2} = \frac{q(2n - q - 1)}{2}$.
+
+Operasi perkalian dan pengurangannya di bawah itu masing-masing ada sekitar $(n- q -1) \min(p,q)^2 \sum_{i = 1}^{\min(p, q)}i^2$. Mungkin salah hehe ga tau deh susah ngitungnya. Tapi sekitar segitu lah.
+
+Intinya kompleksitasnya sekitar $n(p+q)^2$
+
+## Nomor 3
+
+### Teorema Konsistensi
+
+Ada SPL biasa (kumpulan persamaan-persamaan linear) , Ax = b (Persamaan Matriks), dan dalam bentuk matriks augmented (Eliminasi gauss jordan [A | b]. Alasan menggunakan matriks:
+
+1. Kita dapat melupakan nama unknown (Namanya tidak berpengaruh)
+2. Kita dapat menggunakan operasi-operasi pada matriks yang berlaku dalam SPL, dan menghasilkan matriks lain yang ekuivalen dengan SPL di awal (Solusinya sama)
+
+Ada bentuk keempat penyajian spl, yaitu kombinasi linear kolom kolom.
+
+$x_1\vec{c_1} + x_2\vec{c_1} + \dots + x_n\vec{c_1} = \vec{b}$
+
+Mencari solusi sama dengan mencari nilai $x_1, x_2, \dots, x_n$ sehingga memenuhi persamaan linear tersebut
+
+Ruang kolom ialah himpunan semua kombinasi linear kolom kolom, himpunan semua kombinasi linear didapat dari merentangkan suatu himpunan. Secara optimal dapat merentangkan basis. Artinya semua vektor pada himpunan yang baru dibentuk dapat dinyatakan dalam kombinasi linear kolom-kolom atau Coll dari suatu matriks. Sehingga $x_1\vec{c_1} + x_2\vec{c_1} + \dots + x_n\vec{c_1} = \vec{b}$ akan konsisten, ada nilai vektor **x** nya sehingga memenuhi persamaan tersebut. Artinya apabila vektor **b** berada dalam Coll(A) atau berada dalam ruang kolom A, maka SPL A**x** = **b** konsisten.
+
+Apabila konsisten maka ada solusi.
+
+<img src="PSET4.assets/image-20201118141547159-1615862922251-1615863015398.png" alt="image-20201118141547159" style="zoom:50%;" />
+
+Sehingga A**x** = **b** konsisten (***jika dan hanya jika***) $\iff$ **b** adalah kombinasi linear kolom-kolom A, atau $b \in \text{Coll}({A})$.
+
+### Ortogonal Komplemen
+
+W adalah subruang dari RHKD V.
+
+Vektor **v** dikatakan ortogonal dengan W jika **v** ortogonal dengan setiap vektor di W.
+
+Himpunan semua vektor yagn ortogonal dengan W adalah subruang ortogonal komplemen dari W, ditulis $W^\perp$ (Dibaca **W perp**). Sifat-sifat ortogonal komplemen.
+
+- $W^\perp$ subruang, dari $V$
+  - Benar, bahwa vektor nol anggota $W^\perp$, kemudian perhatikan bahwa tertutup terhadap penjumlahan dan perkalian dengan skalar.
+  - ![image-20201125144833026](PSET4.assets/image-20201125144833026-1615863023295.png)
+- $W$ dan $W^\perp$ tidak saling asing, ada vektor nol yang merupakan anggota dari kedua subruang
+- $(W^\perp)^\perp = W$ 
+- $V^\perp$ ialah {**0**}.
+- Jika $W = W^\perp$ maka V = {**0**}.
+- $\text{Null}(A^T) \perp \text{Coll}(A)$ dan $\text{Row}(A) \perp \text{Null}(A)$
+
+Perhatikan bahwa ada beberapa cara penyajian SPL:
+
+1. Himpunan persamaan-persamaan Linear
+2. Persamaan Matriks
+3. Matriks Augmented
+4. Kombinasi Linear kolom-kolom A
+5. Hasil kali titik baris-baris
+
+![image-20201125145628971](PSET4.assets/image-20201125145628971-1615863029656.png)
+
+Buktikan $\text{Row}(A) \perp \text{Null}(A)$ 
+
+![image-20201125150718873](PSET4.assets/image-20201125150718873-1615863038512.png)
+
+![image-20201125150732471](PSET4.assets/image-20201125150732471-1615863045764.png)
+
+![image-20201125150801970](PSET4.assets/image-20201125150801970-1615863050714.png)
+
+Buktikan bahwa subset satu sama lain.
+
+![image-20201125150436219](PSET4.assets/image-20201125150436219-1615863049462.png)
+
+Perhatikan bahwa Ortogonal komplemen belum tentu komplemen dengan irisan sama dengan 0, mungkin saja ada sebuah vektor pada suatu ruang vektor yang tidak ortogonal dengan keduanya. Misalnya, W = Span({(0, 1)}) dan $W^\perp$ = Span({(1, 0)}), perhatikan bahwa ada vektor **v**  = (1, 1) yang bukan anggota keduanya.
+
+### Melalui Dua Titik
+
+Tentukan gradiennya terlebih dahulu, kemudian cari persamaan y = mx + c yang memenuhi keduanya.
+
+### Melalui Tiga Titik
+
+Akan didapatkan tiga titik, 
+
+![image-20201125151228770](PSET4.assets/image-20201125151228770-1615862580265-1615863052596.png)
+
+Akan diselesaikan SPL:
+$$
+\begin{bmatrix}
+x_1 & 1\\
+x_2 & 1\\
+x_3 & 1
+\end{bmatrix}
+\begin{bmatrix}
+a\\ b
+\end{bmatrix}
+=
+\begin{bmatrix}
+y_1 \\ y_2 \\ y_3
+\end{bmatrix} 
+$$
+Bila ada solusi konsisten, maka, ada solusi yang melewati tiga titik.
+
+Pada LSS kita ingin mencari persamaan garis yang cocok, meskipun tidak konsisten.
+
+![image-20201125151513948](PSET4.assets/image-20201125151513948-1615862583242-1615863056005.png)
+
+Kita ingin mencocokkan kurva pada data. Tidak apa apa tidak kolinear, tapi kita masih ingin mencari garis terbaik yang errornya minimal.
+
+Kita harus mengerti teorema konsistensi dan perp.
+
+Masalah kuadrat terkecil ialah kita diberikan spl A**x** = **b**, kita ingin meminimalkan |A**x**-**b**|, atau jarak euclideannya, makanya jarak kuadrat.
+
+Kita ingin mencari pengganti b yang paling dekat, dan b itu harus berada dalam $\text{Coll}(A)$ dan vektornya harus paling dekat ke **b**, agar errornya minimal. Yang paling dekat ialah **proyeksi ortogonal dari b** di ruang kolom $A$.
+
+Ingin dicari $A\vec{x} = \text{proj}_{\text{Coll(A)}}(\vec{b})$
+
+![image-20201125152258636](PSET4.assets/image-20201125152258636-1615862585907.png)
+
+vektor **e** adalah $\text{proj}_{\text{Coll(A)}}(\vec{b})-\vec{b}$, perhatikan bahwa **e** ortogonal dengan **A**, maka  $\vec{e} \in \text{Null}(A^T)$
+
+maka $\vec{e}$ solusi SPL $A^T\vec{x} = \vec{0}$.
+
+![image-20201125153241399](PSET4.assets/image-20201125153241399-1615862587659.png)
+
+## Nomor 4
+
+Observasi penting dari dot product dua vektor $\vec{u}$ dan $\vec{v}$ ialah $u \cdot v = u^\intercal v$. Perhatikan sifat penting sebagai berikut.
+$$
+Qu \cdot Qv = u \cdot v = (Qu)^\intercal(Qv) = u^\intercal Q^\intercal Qv = u^\intercal v = u \cdot v
+$$
+Dari sini, bisa dibawa kepada observasi selanjutnya, bahwa:
+$$
+||Qx||_2 = \sqrt{Qx\cdot Qx}= \sqrt{x\cdot x} = ||x||_2
+$$
+Referensi:
+
+- https://sites.math.rutgers.edu/~cherlin/Courses/250/Lectures/250L26.html
+
+Jika $Q_1$ dan $Q_2$ merupakan matriks ortogonal, (pada matriks ortogonal $Q$, berlaku $Q^\intercal = Q^{-1}$ maka $Q_1Q_2Q_2^\intercal Q_1^\intercal = I$, sehingga $Q_1Q_2(Q_1Q_2)^\intercal = I$, sehingga $Q_1Q_2$ ortogonal juga.
+
+
+
+Hint : $I$ is symmetric and $uu^{T}$ is symmetric.
+
+Thus it follows,
+
+$I^{T} =I$ and $(uu^{T})^{T}=uu^{T}$ (Recall that $(AB)^{T}=B^{T}A^{T}$ )
+
+Hence $H^{T}=(I-uu^{T}/\beta)^{T}=I^{T}-(uu^T/\beta)^{T}=I-uu^{T}/\beta=H$
+
+Verily , $H $ is symmetric.
+
+
+
+
+
+$$H = I - \frac {2} {u^T u} u u^T=I+\alpha \ u u^T$$
+
+$$H^T=(I+\alpha \ u u^T)^T=I^T+\alpha \ (uu^T)^T=I+\alpha (u^T)^Tu^T=I+\alpha \ u u^T=H$$
+
+Where I used $I^T=I$ and the [basic properties](http://en.wikipedia.org/wiki/Transpose#Properties) of the transposed matrix, namely:
+
+*   For scalars $\lambda$ we have $(\lambda A)^T=\lambda A^T$
+*   $(A+B)^T=A^T+B^T$
+*   $(AB)^T=B^TA^T$
+*   $(A^T)^T=A$
+
+
+
+D:
+
+http://fourier.eng.hmc.edu/e176/lectures/NM/node10.html
